@@ -7,6 +7,7 @@ import com.loanBuddyApp.userService.dto.SignupRequest;
 import com.loanBuddyApp.userService.model.User;
 import com.loanBuddyApp.userService.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,9 +22,13 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignupRequest signupRequest) {
-
-        return ResponseEntity.ok(authenticationService.signup(signupRequest));
+    public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
+        try {
+            User user = authenticationService.signup(signupRequest);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+        }
     }
 
     @PostMapping("/signin")

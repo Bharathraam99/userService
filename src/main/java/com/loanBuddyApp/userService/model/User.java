@@ -2,6 +2,7 @@ package com.loanBuddyApp.userService.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,10 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Document(collection = "userManagement")
-public class User implements UserDetails{
+public class User implements UserDetails {
     @Id
     @Field("id")
     private String userId;
+    @Indexed(unique = true)
     private String userName;
     private String userFirstName;
     private String userLastName;
@@ -29,6 +31,10 @@ public class User implements UserDetails{
     private String userCountryName;
     private String userPhoneNumber;
     private Role userRole;
+    private double userBankBalance;
+    private double userLoanAmountBorrowed;
+    private double userLoanInterestRate;
+    private List<Transaction> userTransactions;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

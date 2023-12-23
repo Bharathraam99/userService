@@ -26,7 +26,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JwtService jwtService;
 
-    public User signup(SignupRequest signupRequest) {
+    public User signup(SignupRequest signupRequest) throws Exception {
+
+
+        if (userRepo.existsUserByUserName(signupRequest.getUserName())) {
+            throw new Exception("Username already exists");
+        }
         User user = User.builder()
                 .userName(signupRequest.getUserName())
                 .userAge(signupRequest.getUserAge())
@@ -39,6 +44,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .userEmail(signupRequest.getUserEmail())
                 .build();
         return userRepo.save(user);
+
 
     }
 
@@ -53,19 +59,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return jwtAuthenticationResponse;
     }
 
-    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
+    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         String userName = jwtService.extractUserName(refreshTokenRequest.getToken());
         User user = userRepo.findByUserName(userName).orElseThrow();
-        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)){
-            System.out.println("inside me");
+        if (jwtService.isTokenValid(refreshTokenRequest.getToken(), user)) {
             var jwt = jwtService.generateToken(user);
             JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
             jwtAuthenticationResponse.setToken(jwt);
             jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
             return jwtAuthenticationResponse;
         }
-        System.out.println("inside asd");
 
-        return  null;
+        return null;
     }
 }

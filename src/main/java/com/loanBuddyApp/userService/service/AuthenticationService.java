@@ -7,7 +7,7 @@ import com.loanBuddyApp.userService.dto.SignupRequest;
 import com.loanBuddyApp.userService.model.User;
 
 public interface AuthenticationService {
-    User signup(SignupRequest signupRequest);
+    User signup(SignupRequest signupRequest) throws Exception;
     JwtAuthenticationResponse signin(SigninRequest signinRequest);
 
     JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
