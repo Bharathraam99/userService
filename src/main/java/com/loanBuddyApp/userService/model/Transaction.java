@@ -12,8 +12,7 @@ import java.util.Date;
 public class Transaction {
 
     private String transactionID;
-    private String bankID;
-    private String fromBankID;
+    private String toUserName;
     private double amount;
     private Date timestamp;
     private String description;
