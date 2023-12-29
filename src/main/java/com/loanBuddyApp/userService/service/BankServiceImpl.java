@@ -1,6 +1,8 @@
 package com.loanBuddyApp.userService.service;
 
+import com.loanBuddyApp.userService.dto.LoanRequest;
 import com.loanBuddyApp.userService.dto.TransactionRequest;
+import com.loanBuddyApp.userService.model.Loan;
 import com.loanBuddyApp.userService.model.Transaction;
 import com.loanBuddyApp.userService.model.User;
 import com.loanBuddyApp.userService.repository.UserRepo;
@@ -29,7 +31,7 @@ public class BankServiceImpl implements BankService{
         double transferAmount = transactionRequest.getAmount();
         if(userRepo.existsUserByUserName(toUserName) && userRepo.existsUserByUserName(fromUserName) && checkIfUserHasSufficientBalance(fromUserName, transferAmount) && checkIfBothCustomersAreUsers(fromUserName, toUserName)){
             Transaction transaction=Transaction.builder()
-                    .transactionID(generateTransactionID())
+                    .transactionID(generateUniqueID())
                     .toUserName(transactionRequest.getToUserName())
                     .amount(transactionRequest.getAmount())
                     .timestamp(new Date())
@@ -51,6 +53,20 @@ public class BankServiceImpl implements BankService{
 
     }
 
+    @Override
+    public Loan loanRequest(String userName, LoanRequest loanRequest) {
+        String loanID = userName.substring(0,4).concat(generateUniqueID());
+        Loan loan = Loan.builder()
+                .loanID(loanID)
+                .loanAmount(loanRequest.getLoanAmount())
+                .build();
+        Query query = new Query(Criteria.where("userName").is(userName));
+        Update update = new Update().push("userLoans", loan);
+        mongoTemplate.updateFirst(query, update, User.class);
+
+        return loan;
+    }
+
     private boolean checkIfBothCustomersAreUsers(String fromUserName, String toUserName) {
         return userRepo.findByUserName(fromUserName).get().getUserRole().toString().equals("USER") && userRepo.findByUserName(toUserName).get().getUserRole().toString().equals("USER");
     }
@@ -62,7 +78,7 @@ public class BankServiceImpl implements BankService{
 
     }
 
-    private String generateTransactionID(){
+    private String generateUniqueID(){
         return UUID.randomUUID().toString();
     }
 }
