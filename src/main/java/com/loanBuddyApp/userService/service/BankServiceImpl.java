@@ -59,6 +59,14 @@ public class BankServiceImpl implements BankService{
         Loan loan = Loan.builder()
                 .loanID(loanID)
                 .loanAmount(loanRequest.getLoanAmount())
+                .loanDescription(loanRequest.getLoanDescription())
+                .creditScore(loanRequest.getCreditScore())
+                .loanCollateral(loanRequest.isLoanCollateral())
+                .ssnNumber(loanRequest.getSsnNumber())
+                .annualSalary(loanRequest.getAnnualSalary())
+                .propertiesPossessed(loanRequest.getPropertiesPossessed())
+                .netWorth(loanRequest.getNetWorth())
+                .netWorthDocumentation(loanRequest.getNetWorthDocumentation())
                 .build();
         Query query = new Query(Criteria.where("userName").is(userName));
         Update update = new Update().push("userLoans", loan);
