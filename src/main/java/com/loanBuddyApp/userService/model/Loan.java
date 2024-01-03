@@ -20,4 +20,6 @@ public class Loan {
     private int propertiesPossessed;
     private double netWorth;
     private String netWorthDocumentation;
+    private String loanManager;
+    private double approvedLoanAmount;
 }

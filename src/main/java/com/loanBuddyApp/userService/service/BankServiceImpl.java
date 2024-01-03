@@ -1,11 +1,13 @@
 package com.loanBuddyApp.userService.service;
 
 import com.loanBuddyApp.userService.dto.LoanRequest;
+import com.loanBuddyApp.userService.dto.ManagerLoanApprovalRequest;
 import com.loanBuddyApp.userService.dto.TransactionRequest;
 import com.loanBuddyApp.userService.model.Loan;
 import com.loanBuddyApp.userService.model.Transaction;
 import com.loanBuddyApp.userService.model.User;
 import com.loanBuddyApp.userService.repository.UserRepo;
+import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -67,6 +69,7 @@ public class BankServiceImpl implements BankService{
                 .propertiesPossessed(loanRequest.getPropertiesPossessed())
                 .netWorth(loanRequest.getNetWorth())
                 .netWorthDocumentation(loanRequest.getNetWorthDocumentation())
+                .loanManager("")
                 .build();
         Query query = new Query(Criteria.where("userName").is(userName));
         Update update = new Update().push("userLoans", loan);
@@ -74,6 +77,27 @@ public class BankServiceImpl implements BankService{
 
         return loan;
     }
+
+    @Override
+    public void approveLoan(String managerUserName, ManagerLoanApprovalRequest managerLoanApprovalRequest) throws Exception {
+            Query query = new Query(Criteria.where("userName").is(managerLoanApprovalRequest.getLoanSecurer())
+                    .and("userLoans").elemMatch(Criteria.where("loanID").is(managerLoanApprovalRequest.getLoanID())));
+            Update update = new Update()
+                    .set("userLoans.$.loanSanctioned", true)
+                    .set("userLoans.$.loanManager", managerUserName)
+                    .set("userLoans.$.approvedLoanAmount", managerLoanApprovalRequest.getApprovedLoanAmount())
+                    .set("userLoans.$.loanInterestRate", managerLoanApprovalRequest.getLoanInterestRate())
+                    .set("userLoans.$.timeInMonths", managerLoanApprovalRequest.getTimeInMonths())
+                    .inc("userLoanAmountBorrowed", managerLoanApprovalRequest.getApprovedLoanAmount());
+            UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
+            System.out.println("Update Result: " + updateResult);
+
+            if (updateResult.getModifiedCount() == 0) {
+                throw new Exception("Failed to approve loan. Loan not found or already approved.");
+            }
+
+    }
+
 
     private boolean checkIfBothCustomersAreUsers(String fromUserName, String toUserName) {
         return userRepo.findByUserName(fromUserName).get().getUserRole().toString().equals("USER") && userRepo.findByUserName(toUserName).get().getUserRole().toString().equals("USER");

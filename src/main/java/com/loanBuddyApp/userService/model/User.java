@@ -33,9 +33,8 @@ public class User implements UserDetails {
     private Role userRole;
     private double userBankBalance;
     private double userLoanAmountBorrowed;
-    private double userLoanInterestRate;
     private List<Transaction> userTransactions;
-
+    private List<Loan> userLoans;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(userRole.name()));
